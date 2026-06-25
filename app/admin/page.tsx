@@ -1,16 +1,30 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import StatusBadge from '@/components/StatusBadge'
+import SortableHeader from '@/components/SortableHeader'
 import { publishEvent } from '@/app/actions/events'
 import type { Event } from '@/lib/types'
 
-export default async function AdminEventsPage() {
+const SORTABLE_FIELDS = ['title', 'city', 'start_date', 'source', 'status'] as const
+type SortField = typeof SORTABLE_FIELDS[number]
+
+export default async function AdminEventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string; order?: string }>
+}) {
+  const { sort, order } = await searchParams
+  const sortField: SortField = (SORTABLE_FIELDS as readonly string[]).includes(sort ?? '')
+    ? (sort as SortField)
+    : 'start_date'
+  const sortAsc = order === 'asc'
+
   const supabase = await createClient()
 
   const { data: events, error } = await supabase
     .from('events')
     .select('*, event_category_links(category_id, category:event_categories(id, name))')
-    .order('start_date', { ascending: false })
+    .order(sortField, { ascending: sortAsc })
 
   if (error) {
     return (
@@ -26,6 +40,8 @@ export default async function AdminEventsPage() {
     draft: events?.filter(e => e.status === 'draft').length ?? 0,
     needsEnrichment: events?.filter(e => e.needs_enrichment).length ?? 0,
   }
+
+  const sortProps = { currentSort: sortField, currentOrder: order === 'asc' ? 'asc' : 'desc' }
 
   return (
     <div>
@@ -54,13 +70,23 @@ export default async function AdminEventsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-700">Titel</th>
-                <th className="px-4 py-3 font-medium text-gray-700">Ort</th>
-                <th className="px-4 py-3 font-medium text-gray-700">Datum</th>
+                <th className="px-4 py-3">
+                  <SortableHeader field="title" label="Titel" {...sortProps} />
+                </th>
+                <th className="px-4 py-3">
+                  <SortableHeader field="city" label="Ort" {...sortProps} />
+                </th>
+                <th className="px-4 py-3">
+                  <SortableHeader field="start_date" label="Datum" {...sortProps} />
+                </th>
                 <th className="px-4 py-3 font-medium text-gray-700">Kategorie</th>
-                <th className="px-4 py-3 font-medium text-gray-700">Quelle</th>
+                <th className="px-4 py-3">
+                  <SortableHeader field="source" label="Quelle" {...sortProps} />
+                </th>
                 <th className="px-4 py-3 font-medium text-gray-700">Angereichert</th>
-                <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+                <th className="px-4 py-3">
+                  <SortableHeader field="status" label="Status" {...sortProps} />
+                </th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
