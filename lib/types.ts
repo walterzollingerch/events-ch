@@ -59,3 +59,14 @@ export interface Event {
 
 export type EventInsert = Omit<Event, 'id' | 'created_at' | 'updated_at'>
 export type EventUpdate = Partial<EventInsert>
+
+export interface UrlBlacklist {
+  id: number
+  domain: string
+  reason: string | null
+  blacklisted_at: string
+  created_by: string
+  created_at: string
+}
+
+export type UrlBlacklistInsert = Pick<UrlBlacklist, 'domain' | 'reason' | 'created_by'>
