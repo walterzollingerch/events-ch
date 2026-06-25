@@ -59,6 +59,7 @@ export default async function AdminEventsPage() {
                 <th className="px-4 py-3 font-medium text-gray-700">Datum</th>
                 <th className="px-4 py-3 font-medium text-gray-700">Kategorie</th>
                 <th className="px-4 py-3 font-medium text-gray-700">Quelle</th>
+                <th className="px-4 py-3 font-medium text-gray-700">Angereichert</th>
                 <th className="px-4 py-3 font-medium text-gray-700">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -86,6 +87,13 @@ export default async function AdminEventsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {event.source ?? '—'}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {event.last_enriched_at
+                      ? new Date(event.last_enriched_at).toLocaleDateString('de-CH', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                        })
+                      : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">

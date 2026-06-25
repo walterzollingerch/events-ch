@@ -49,6 +49,7 @@ export interface Event {
   price: string | null
   status: EventStatus
   needs_enrichment: boolean
+  last_enriched_at: string | null
   source: string | null
   gallery_images: string[]
   created_at: string
