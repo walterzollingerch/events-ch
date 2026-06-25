@@ -35,6 +35,7 @@ export default function AdminNav({ userEmail, role }: { userEmail: string; role:
         <div className="flex items-center gap-6">
           <span className="font-bold text-gray-900">Events.ch</span>
           {navLink('/admin', 'Events')}
+          {navLink('/admin/categories', 'Kategorien')}
           {role === 'admin' && navLink('/admin/users', 'Benutzer')}
         </div>
         <div className="flex items-center gap-3">
