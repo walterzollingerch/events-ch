@@ -48,6 +48,7 @@ export interface Event {
   organizer: string | null
   price: string | null
   status: EventStatus
+  needs_enrichment: boolean
   source: string | null
   gallery_images: string[]
   created_at: string

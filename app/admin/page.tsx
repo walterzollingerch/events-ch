@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import StatusBadge from '@/components/StatusBadge'
+import { publishEvent } from '@/app/actions/events'
 import type { Event } from '@/lib/types'
 
 export default async function AdminEventsPage() {
@@ -8,7 +9,7 @@ export default async function AdminEventsPage() {
 
   const { data: events, error } = await supabase
     .from('events')
-    .select('*')
+    .select('*, event_category_links(category_id, category:event_categories(id, name))')
     .order('start_date', { ascending: false })
 
   if (error) {
@@ -23,6 +24,7 @@ export default async function AdminEventsPage() {
     total: events?.length ?? 0,
     published: events?.filter(e => e.status === 'published').length ?? 0,
     draft: events?.filter(e => e.status === 'draft').length ?? 0,
+    needsEnrichment: events?.filter(e => e.needs_enrichment).length ?? 0,
   }
 
   return (
@@ -33,6 +35,9 @@ export default async function AdminEventsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Events</h1>
           <p className="text-sm text-gray-500 mt-1">
             {counts.total} total · {counts.published} publiziert · {counts.draft} Entwürfe
+            {counts.needsEnrichment > 0 && (
+              <span className="text-orange-600"> · {counts.needsEnrichment} anreichern</span>
+            )}
           </p>
         </div>
         <Link
@@ -74,22 +79,43 @@ export default async function AdminEventsPage() {
                       year: 'numeric',
                     })}
                   </td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">
-                    {event.category ?? '—'}
+                  <td className="px-4 py-3 text-gray-600">
+                    {event.event_category_links?.length
+                      ? event.event_category_links.map(l => l.category?.name).filter(Boolean).join(', ')
+                      : (event.category ?? '—')}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {event.source ?? '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={event.status} />
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={event.status} />
+                      {event.needs_enrichment && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                          Anreichern
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/events/${event.id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Bearbeiten
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      {!event.needs_enrichment && event.status === 'draft' && (
+                        <form action={publishEvent.bind(null, event.id)}>
+                          <button
+                            type="submit"
+                            className="text-green-600 hover:text-green-800 font-medium"
+                          >
+                            Aktivieren
+                          </button>
+                        </form>
+                      )}
+                      <Link
+                        href={`/admin/events/${event.id}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Bearbeiten
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
