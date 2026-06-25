@@ -93,8 +93,18 @@ export default async function AdminEventsPage({
             <tbody className="divide-y divide-gray-100">
               {(events as Event[]).map(event => (
                 <tr key={event.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">
-                    {event.title}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                        {event.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={event.image_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200" />
+                        )}
+                      </div>
+                      <span className="font-medium text-gray-900 truncate max-w-xs">{event.title}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {event.city ?? event.location ?? '—'}
