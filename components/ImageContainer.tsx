@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Image from 'next/image'
 
 type Props = {
   mainImage: string | null
@@ -110,13 +109,8 @@ function ImageSlot({ url, onUpload, onRemove, aspectClass }: SlotProps) {
 
       {url ? (
         <>
-          <Image
-            src={url}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 400px"
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" />
           {/* Hover-Overlay */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             <button
