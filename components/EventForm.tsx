@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import ImageContainer from '@/components/ImageContainer'
 import type { Event, EventStatus, EventCategory } from '@/lib/types'
 
 const CATEGORIES: EventCategory[] = [
@@ -31,21 +32,22 @@ export default function EventForm({ event, role }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
-    title:       event?.title ?? '',
-    description: event?.description ?? '',
-    location:    event?.location ?? '',
-    address:     event?.address ?? '',
-    city:        event?.city ?? '',
-    canton:      event?.canton ?? '',
-    start_date:  toDatetimeLocal(event?.start_date),
-    end_date:    toDatetimeLocal(event?.end_date),
-    url:         event?.url ?? '',
-    image_url:   event?.image_url ?? '',
-    category:    event?.category ?? '',
-    organizer:   event?.organizer ?? '',
-    price:       event?.price ?? '',
-    status:      event?.status ?? 'draft',
-    source:      event?.source ?? '',
+    title:          event?.title ?? '',
+    description:    event?.description ?? '',
+    location:       event?.location ?? '',
+    address:        event?.address ?? '',
+    city:           event?.city ?? '',
+    canton:         event?.canton ?? '',
+    start_date:     toDatetimeLocal(event?.start_date),
+    end_date:       toDatetimeLocal(event?.end_date),
+    url:            event?.url ?? '',
+    image_url:      event?.image_url ?? null,
+    gallery_images: event?.gallery_images ?? [],
+    category:       event?.category ?? '',
+    organizer:      event?.organizer ?? '',
+    price:          event?.price ?? '',
+    status:         event?.status ?? 'draft',
+    source:         event?.source ?? '',
   })
 
   function set(field: string, value: string) {
@@ -58,21 +60,22 @@ export default function EventForm({ event, role }: Props) {
     setError(null)
 
     const payload = {
-      title:       form.title,
-      description: form.description || null,
-      location:    form.location || null,
-      address:     form.address || null,
-      city:        form.city || null,
-      canton:      form.canton || null,
-      start_date:  form.start_date,
-      end_date:    form.end_date || null,
-      url:         form.url || null,
-      image_url:   form.image_url || null,
-      category:    (form.category as EventCategory) || null,
-      organizer:   form.organizer || null,
-      price:       form.price || null,
-      status:      form.status as EventStatus,
-      source:      form.source || null,
+      title:          form.title,
+      description:    form.description || null,
+      location:       form.location || null,
+      address:        form.address || null,
+      city:           form.city || null,
+      canton:         form.canton || null,
+      start_date:     form.start_date,
+      end_date:       form.end_date || null,
+      url:            form.url || null,
+      image_url:      form.image_url || null,
+      gallery_images: form.gallery_images.filter(Boolean),
+      category:       (form.category as EventCategory) || null,
+      organizer:      form.organizer || null,
+      price:          form.price || null,
+      status:         form.status as EventStatus,
+      source:         form.source || null,
     }
 
     if (isNew) {
@@ -146,6 +149,18 @@ export default function EventForm({ event, role }: Props) {
             />
           </div>
         </div>
+      </section>
+
+      {/* Bilder */}
+      <section className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="font-semibold text-gray-900 mb-4">Bilder</h2>
+        <ImageContainer
+          mainImage={form.image_url}
+          galleryImages={form.gallery_images}
+          onChange={(img, gallery) =>
+            setForm(prev => ({ ...prev, image_url: img, gallery_images: gallery }))
+          }
+        />
       </section>
 
       {/* Ort */}
@@ -237,16 +252,6 @@ export default function EventForm({ event, role }: Props) {
             type="url"
             value={form.url}
             onChange={e => set('url', e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bild-URL</label>
-          <input
-            type="url"
-            value={form.image_url}
-            onChange={e => set('image_url', e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
